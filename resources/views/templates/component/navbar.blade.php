@@ -20,15 +20,11 @@
                 <li>
                   <div class="col-sm-4">
                     <ul class="multi-column-dropdown">
-                      @for ($genre = 1; $genre <= $genres->count() - 1; $genre++)
-                        <li><a href="{{ route('genre', $genres[$genre]->id) }}">{{ $genres[$genre]->name }}</a></li>
-                        @if($genre % 7 == 0)
-                          </ul>
-                        </div>
-                        <div class="col-sm-4">
-                          <ul class="multi-column-dropdown">
-                        @endif
-                      @endfor
+                      @if(isset($genres))
+                        @foreach ($genres as $genre)
+                          <li><a href="{{ route('genre', $genre->name) }}">{{ $genre->name }}</a></li>
+                        @endforeach
+                      @endif
                     </ul>
                   </div>
                   <div class="clearfix"></div>
@@ -36,7 +32,6 @@
               </ul>
             </li>
             <li class="w3_home_act {{ Route::current()->getName() == 'movies' ? 'active' : '' }}"><a href="{{ route('movies') }}">Movies</a></li>
-
           </ul>
         </nav>
       </div>

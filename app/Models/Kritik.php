@@ -17,4 +17,31 @@ class Kritik extends Model
         'film_id',
         'user_id',
     ];
+
+    /**
+     * Kritik belongs to a user.
+     * Falls back to "Anonim" if user is deleted or missing.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id')->withDefault([
+            'name' => 'Anonim',
+        ]);
+    }
+
+    /**
+     * Accessor for user display name with fallback.
+     */
+    public function getUserNameAttribute(): string
+    {
+        return !empty($this->user?->name) ? $this->user->name : 'Anonim';
+    }
+
+    /**
+     * Kritik belongs to a film.
+     */
+    public function film()
+    {
+        return $this->belongsTo(Film::class, 'film_id');
+    }
 }

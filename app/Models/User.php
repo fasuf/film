@@ -20,6 +20,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'google_id',
+        'role_id',
+        'profile_id',
+        'email_verified_at',
     ];
 
     /**
@@ -44,4 +48,47 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the role associated with the user.
+     */
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Get the profile associated with the user.
+     */
+    public function profile()
+    {
+        return $this->belongsTo(Profile::class);
+    }
+
+    /**
+     * Get the comments/reviews authored by the user.
+     */
+    public function kritiks()
+    {
+        return $this->hasMany(Kritik::class);
+    }
+
+    /**
+     * Check if the user has admin role.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role && $this->role->name === 'admin';
+    }
+
+    /**
+     * Boot model events: cascade delete related data when user is deleted.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (User $user) {
+            $user->kritiks()->delete();
+        });
+    }
 }
+

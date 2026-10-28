@@ -52,17 +52,33 @@
                     <table id="table-breakpoint">
                       <thead>
                         <tr>
-                        <th>Cast</th>
-                        <th>Peran</th>
+                        <th style="width: 50%;">Cast / Aktor</th>
+                        <th style="width: 50%;">Peran</th>
                         </tr>
                       </thead>
                       <tbody>
-                        @foreach ($perans as $peran)
+                        @forelse ($perans as $peran)
                         <tr>
-                          <td class="w3-list-info">{{ $peran->cast_id }}</td>
-                          <td class="w3-list-info">{{ $peran->actor }}</td>
+                          <td class="w3-list-info">
+                            <span style="font-weight: 600; color: #212121;">
+                              <i class="fa fa-user" style="color: #ff8d1b; margin-right: 6px;"></i>
+                              {{ $peran->cast->name ?? 'Cast #' . $peran->cast_id }}
+                            </span>
+                            @if(!empty($peran->cast?->age))
+                              <small style="color: #888; font-size: 11px;">({{ $peran->cast->age }} thn)</small>
+                            @endif
+                          </td>
+                          <td class="w3-list-info">
+                            {{ $peran->actor ?: '-' }}
+                          </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                          <td colspan="2" class="w3-list-info" style="text-align: center; color: #888; padding: 20px;">
+                            <em>Belum ada data cast</em>
+                          </td>
+                        </tr>
+                        @endforelse
                       </tbody>
                     </table>
                   </div>
@@ -114,49 +130,133 @@
           </div>
         </div>
         <div class="clearfix"> </div>
-        <div class="all-comments">
+        <style>
+          .all-comments { background: #ffffff !important; padding: 25px; border-radius: 8px; border: 1px solid #e5e7eb; margin-top: 30px; }
+          .all-comments .media { margin: 18px 0 !important; padding-left: 0 !important; border-bottom: 1px solid #e9ecef; padding-bottom: 18px; }
+          .all-comments .media:nth-child(3), .all-comments .media:nth-child(5) { padding-left: 0 !important; }
+          .all-comments .media-body p { color: #1f2937 !important; font-size: 14.5px !important; line-height: 1.6 !important; margin: 6px 0 8px !important; }
+          .all-comments .media h5 { color: #111827 !important; font-size: 15px !important; font-weight: 700 !important; margin: 0 !important; }
+          .all-comments .media-body small { color: #6b7280 !important; font-size: 12px !important; }
+        </style>
+        <div class="all-comments" id="comments">
+          <div id="komentar" style="position: relative; top: -20px;"></div>
           <div class="all-comments-info">
-            <a href="#">Comments</a>
-            <div class="agile-info-wthree-box">
-              <form>
-                <input type="text" placeholder="Name" required="">			           					   
-                <input type="text" placeholder="Email" required="">
-                <input type="text" placeholder="Phone" required="">
-                <textarea placeholder="Message" required=""></textarea>
-                <input type="submit" value="SEND">
-                <div class="clearfix"> </div>
-              </form>
-            </div>
+            <a href="#komentar" style="color: #ff8d1b; font-weight: bold; font-size: 18px;">
+              <i class="fa fa-comments"></i> Ulasan & Komentar ({{ $comments->count() }})
+            </a>
+
+            {{-- Flash Notification inside comments --}}
+            @if(session('success'))
+              <div class="alert alert-success alert-dismissible" role="alert" style="margin-top: 15px; margin-bottom: 15px; border-radius: 4px; background-color: #d4edda; color: #155724; border-color: #c3e6cb; font-size: 14px;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <i class="fa fa-check-circle"></i> {{ session('success') }}
+              </div>
+            @endif
+            @if(session('error'))
+              <div class="alert alert-danger alert-dismissible" role="alert" style="margin-top: 15px; margin-bottom: 15px; border-radius: 4px; background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; font-size: 14px;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <i class="fa fa-exclamation-triangle"></i> {{ session('error') }}
+              </div>
+            @endif
+
+            @auth
+              {{-- Form komentar hanya untuk user yang sudah login --}}
+              <div class="agile-info-wthree-box" style="margin-top: 15px; margin-bottom: 25px; background: #fbfbfb; border: 1px solid #eee; border-radius: 6px; padding: 18px;">
+                <form action="{{ route('comments.store', $film->id) }}" method="POST">
+                  @csrf
+                  <div style="margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <div style="color: #222; font-size: 14px; font-weight: 500;">
+                      <i class="fa fa-user-circle" style="color: #ff8d1b; font-size: 16px;"></i> Berkomentar sebagai: <strong style="color: #111;">{{ Auth::user()->name }}</strong>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <label style="color: #222; font-weight: bold; margin: 0; font-size: 13px;"><i class="fa fa-star" style="color: #ff8d1b;"></i> Beri Rating:</label>
+                      <select name="rating" required style="padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: #fff; color: #111; font-weight: bold; font-size: 13px;">
+                        <option value="">-- Pilih Rating --</option>
+                        @for($r = 10; $r >= 1; $r--)
+                          <option value="{{ $r }}" {{ old('rating', 10) == $r ? 'selected' : '' }}>⭐ {{ $r }} / 10</option>
+                        @endfor
+                      </select>
+                    </div>
+                  </div>
+
+                  <textarea name="comment" placeholder="Tuliskan ulasan atau tanggapan Anda tentang film ini..." required style="min-height: 90px; margin-bottom: 8px; width: 100%; border: 1px solid #ccc; border-radius: 4px; padding: 10px; font-size: 14px; color: #222; background: #fff; resize: vertical;">{{ old('comment') }}</textarea>
+                  
+                  @error('comment')
+                    <span style="color:#d9534f; font-size:13px; font-weight:bold; display:block; margin-bottom:8px;">{{ $message }}</span>
+                  @enderror
+                  @error('rating')
+                    <span style="color:#d9534f; font-size:13px; font-weight:bold; display:block; margin-bottom:8px;">{{ $message }}</span>
+                  @enderror
+
+                  <input type="submit" value="KIRIM KOMENTAR" style="background: #ff8d1b; color: #fff; font-weight: bold; border: none; padding: 9px 24px; border-radius: 4px; cursor: pointer;">
+                  <div class="clearfix"> </div>
+                </form>
+              </div>
+            @else
+              {{-- Pesan & Tombol jika user belum login --}}
+              <div style="background: #fff8f0; border: 1px solid #ffd8a8; border-radius: 6px; padding: 22px; text-align: center; margin: 20px 0 28px;">
+                <i class="fa fa-lock" style="font-size: 30px; color: #ff8d1b; margin-bottom: 10px; display: block;"></i>
+                <h4 style="color: #212529; font-size: 16px; margin-bottom: 8px; font-weight: bold;">Ingin Berkomentar?</h4>
+                <p style="color: #495057; font-size: 14px; margin-bottom: 16px;">
+                  Silakan login terlebih dahulu untuk dapat menulis ulasan dan memberikan rating pada film ini.
+                </p>
+                <a href="{{ route('login', ['redirect' => route('movies.show', $film->id) . '#komentar']) }}" 
+                   class="btn btn-warning" 
+                   style="background: #ff8d1b; border: none; font-weight: bold; padding: 9px 24px; border-radius: 4px; color: #fff; text-decoration: none; display: inline-block;">
+                  <i class="fa fa-sign-in"></i> Login untuk berkomentar
+                </a>
+              </div>
+            @endauth
           </div>
+
           <div class="media-grids">
-            @foreach ($comments as $comment)
-              <div class="media">
-                <h5>{{ $comment->user_id }}</h5>
+            @forelse ($comments as $comment)
+              <div class="media" style="border-bottom: 1px solid #e9ecef; padding-bottom: 16px; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <h5 style="margin: 0; font-size: 15px; color: #111; font-weight: 700;">
+                    <i class="fa fa-user-circle" style="color: #ff8d1b; margin-right: 4px;"></i> {{ !empty($comment->user?->name) ? $comment->user->name : 'Anonim' }}
+                  </h5>
+                  @if($comment->rating)
+                    <span style="background: #fff8e1; color: #b78103; border: 1px solid #ffe082; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">
+                      <i class="fa fa-star" style="color: #ff8d1b;"></i> {{ $comment->rating }}/10
+                    </span>
+                  @endif
+                </div>
                 <div class="media-left">
                   <a href="#">
-                    <img src="{{ asset('storage/images/user.jpg') }}" title="One movies" alt=" " />
+                    <img src="{{ asset('template/images/user.jpg') }}" title="{{ !empty($comment->user?->name) ? $comment->user->name : 'Anonim' }}" alt="avatar" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #ff8d1b;" onerror="this.src='{{ asset('template/images/user.jpg') }}'" />
                   </a>
                 </div>
                 <div class="media-body">
-                  <p>{{ $comment->comment }}</p>
+                  <p style="color: #212529; line-height: 1.6; font-size: 14px; margin: 4px 0 6px; font-weight: 400;">
+                    {{ $comment->comment }}
+                  </p>
+                  <small style="color: #6c757d; font-size: 12px; display: inline-block;">
+                    <i class="fa fa-clock-o"></i> {{ $comment->created_at ? $comment->created_at->format('d M Y, H:i') . ' • ' . $comment->created_at->diffForHumans() : '-' }}
+                  </small>
                 </div>
               </div>
-            @endforeach
+            @empty
+              <div style="text-align: center; color: #6c757d; padding: 30px; font-size: 14px;">
+                <i class="fa fa-comment-o" style="font-size: 28px; color: #ccc; margin-bottom: 8px; display: block;"></i>
+                <em>Belum ada ulasan untuk film ini. Jadilah yang pertama memberikan ulasan!</em>
+              </div>
+            @endforelse
           </div>
         </div>
       </div>
       <div class="col-md-4 single-right">
         <h3>Similar Film By Genre</h3>
-        @foreach ($filmByGenre as $film)
+        @foreach ($filmByGenre as $fGenre)
           <div class="single-grid-right">
             <div class="single-right-grids">
               <div class="col-md-4 single-right-grid-left">
-                <a href="{{ route('movies.show', $film->id) }}"><img src="/{{ $film->poster }}" alt="" /></a>
+                <a href="{{ route('movies.show', $fGenre->id) }}"><img src="/{{ $fGenre->poster }}" alt="" /></a>
               </div>
               <div class="col-md-8 single-right-grid-right">
-                <a href="{{ route('movies.show', $film->id) }}" class="title">{{ $film->title }}</a>
-                <p class="author"><a href="#" class="author">{{ $film->year }}</a></p>
-                <p class="views" style="text-align: justify; margin-right: 10px">{{ $film->sinopsis }}</p>
+                <a href="{{ route('movies.show', $fGenre->id) }}" class="title">{{ $fGenre->title }}</a>
+                <p class="author"><a href="#" class="author">{{ $fGenre->year }}</a></p>
+                <p class="views" style="text-align: justify; margin-right: 10px">{{ $fGenre->sinopsis }}</p>
               </div>
               <div class="clearfix"> </div>
             </div>

@@ -30,7 +30,21 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 		</ul>
   </nav>
 </div>
-<!-- /w3l-medile-movies-grids -->
+<!-- Flash Messages -->
+<div class="container" style="margin-top: 15px;">
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible" role="alert" style="border-radius: 4px;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <i class="fa fa-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible" role="alert" style="border-radius: 4px;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <i class="fa fa-exclamation-triangle"></i> {{ session('error') }}
+        </div>
+    @endif
+</div>
 @yield('content')
 	<!-- //comedy-w3l-agileits -->
 <!-- footer -->

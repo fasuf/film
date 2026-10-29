@@ -28,6 +28,7 @@ Route::get('/movies/{film}', [FilmController::class, 'show'])->name('movies.show
 Route::get('/genre/{genre}', [FilmController::class, 'moviesByGenre'])->name('genre');
 Route::get('/movies/genre/{genre}', [FilmController::class, 'moviesByGenre']);
 Route::get('/faq', [FilmController::class, 'faq'])->name('faq');
+Route::post('/subscribe', [FilmController::class, 'subscribe'])->middleware('auth')->name('subscribe');
 
 // Comments (Protected inside controller / middleware)
 Route::post('/movies/{film}/comments', [KritikController::class, 'store'])->name('comments.store');

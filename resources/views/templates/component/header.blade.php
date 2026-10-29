@@ -153,7 +153,7 @@
             }
           </style>
         @else
-          <li><a href="#" data-toggle="modal" data-target="#myModal">Login</a></li>
+          <li><a href="#" data-toggle="modal" data-target="#myModal">Login / Register</a></li>
         @endauth
       </ul>
     </div>

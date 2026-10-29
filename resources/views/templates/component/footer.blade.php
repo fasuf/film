@@ -5,11 +5,17 @@
         <div class="w3ls_footer_grid_left1">
           <h2>Subscribe to us</h2>
           <div class="w3ls_footer_grid_left1_pos">
-            <form action="#" method="post">
-              <input type="email" name="email" placeholder="Your email..." required="">
+            <form action="{{ route('subscribe') }}" method="POST">
+              @csrf
+              <input type="email" name="email" value="{{ old('email', Auth::user()?->email) }}" placeholder="Your email..." required="">
               <input type="submit" value="Send">
             </form>
           </div>
+          @error('email')
+            <p style="color: #ff8c1a; font-size: 13px; margin-top: 8px; font-weight: 500;">
+              <i class="fa fa-exclamation-circle"></i> {{ $message }}
+            </p>
+          @enderror
         </div>
       </div>
       <div class="col-md-6 w3ls_footer_grid_right">

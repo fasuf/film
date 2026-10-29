@@ -12,6 +12,21 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->redirectGuestsTo(function ($request) {
+            if ($request->is('subscribe') || $request->routeIs('subscribe')) {
+                session()->flash('warning', 'Silakan login terlebih dahulu untuk subscribe.');
+            } else {
+                session()->flash('warning', 'Silakan login terlebih dahulu untuk melanjutkan.');
+            }
+
+            $previous = url()->previous();
+            if ($previous && !str_contains($previous, '/login') && !str_contains($previous, '/register') && !str_contains($previous, '/subscribe')) {
+                session()->put('url.intended', $previous);
+            }
+
+            return route('login');
+        });
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);

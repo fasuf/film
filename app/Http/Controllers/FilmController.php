@@ -12,6 +12,7 @@ use App\Http\Requests\StoreFilmRequest;
 use App\Http\Requests\UpdateFilmRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FilmController extends Controller
 {
@@ -201,5 +202,25 @@ class FilmController extends Controller
         ];
 
         return view('components.faq', compact('faqs'));
+    }
+
+    /**
+     * Handle newsletter subscription simulation.
+     */
+    public function subscribe(Request $request)
+    {
+        if (!Auth::check()) {
+            session()->put('url.intended', url()->previous());
+            return redirect()->route('login')->with('warning', 'Silakan login terlebih dahulu untuk subscribe.');
+        }
+
+        $request->validate([
+            'email' => 'required|email',
+        ], [
+            'email.required' => 'Email wajib diisi.',
+            'email.email'    => 'Format email tidak valid.',
+        ]);
+
+        return back()->with('success', 'Berhasil! Terima kasih sudah subscribe.');
     }
 }

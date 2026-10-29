@@ -11,6 +11,102 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 @include('templates.component.head')
 	
 <body>
+@if(session('success'))
+<div class="top-alert-banner top-alert-success" role="alert">
+    <div class="container">
+        <div class="top-alert-content">
+            <div class="top-alert-message">
+                <i class="fa fa-check-circle top-alert-icon"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+            <button type="button" class="top-alert-close" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
+</div>
+@endif
+
+@if(session('warning'))
+<div class="top-alert-banner top-alert-warning" role="alert">
+    <div class="container">
+        <div class="top-alert-content">
+            <div class="top-alert-message">
+                <i class="fa fa-exclamation-triangle top-alert-icon-warning"></i>
+                <span>{{ session('warning') }}</span>
+            </div>
+            <button type="button" class="top-alert-close" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
+</div>
+@endif
+
+@if(session('success') || session('warning'))
+<style>
+.top-alert-banner {
+    background: #212121;
+    color: #ffffff;
+    padding: 12px 0;
+    width: 100%;
+    position: relative;
+    z-index: 99999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+.top-alert-success {
+    border-bottom: 2px solid #ff8c1a;
+}
+.top-alert-warning {
+    border-bottom: 2px solid #ffaa00;
+}
+.top-alert-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+}
+.top-alert-message {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 500;
+}
+.top-alert-icon {
+    color: #ff8c1a;
+    font-size: 18px;
+    margin-right: 10px;
+}
+.top-alert-icon-warning {
+    color: #ffaa00;
+    font-size: 18px;
+    margin-right: 10px;
+}
+.top-alert-close {
+    background: transparent;
+    border: none;
+    color: #ff8c1a;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 6px;
+    transition: color 0.2s, transform 0.2s;
+    outline: none;
+}
+.top-alert-close:hover {
+    color: #ffffff;
+    transform: scale(1.15);
+}
+@media (max-width: 768px) {
+    .top-alert-message {
+        font-size: 13px;
+    }
+    .top-alert-banner {
+        padding: 10px 0;
+    }
+}
+</style>
+@endif
 <!-- header -->
 @include('templates.component.header')
 <!-- //header -->
@@ -32,12 +128,6 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 </div>
 <!-- Flash Messages -->
 <div class="container" style="margin-top: 15px;">
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible" role="alert" style="border-radius: 4px;">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <i class="fa fa-check-circle"></i> {{ session('success') }}
-        </div>
-    @endif
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible" role="alert" style="border-radius: 4px;">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -82,6 +172,21 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 			
 			$().UItoTop({ easingType: 'easeOutQuart' });
 			
+			// Top success & warning alert dismiss & auto-hide
+			var $topAlerts = $('.top-alert-banner');
+			if ($topAlerts.length) {
+				$topAlerts.on('click', '.top-alert-close', function() {
+					$(this).closest('.top-alert-banner').slideUp(400, function() {
+						$(this).remove();
+					});
+				});
+
+				setTimeout(function() {
+					$topAlerts.slideUp(500, function() {
+						$(this).remove();
+					});
+				}, 4000);
+			}
 		});
 		@stack('script')
 		</script>

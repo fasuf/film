@@ -38,7 +38,7 @@
           <div class="single-right-grids">
 
             <div class="col-md-4 single-right-grid-left">
-              <a href="{{ route('movies.show', $film->id) }}"><img src="/{{ $film->poster }}" alt="" /></a>
+              <a href="{{ route('movies.show', $film->id) }}"><img src="{{ $film->poster_url }}" alt="" /></a>
             </div>
             <div class="col-md-8 single-right-grid-right">
               <div class="song-info">
@@ -251,7 +251,7 @@
           <div class="single-grid-right">
             <div class="single-right-grids">
               <div class="col-md-4 single-right-grid-left">
-                <a href="{{ route('movies.show', $fGenre->id) }}"><img src="/{{ $fGenre->poster }}" alt="" /></a>
+                <a href="{{ route('movies.show', $fGenre->id) }}"><img src="{{ $fGenre->poster_url }}" alt="" /></a>
               </div>
               <div class="col-md-8 single-right-grid-right">
                 <a href="{{ route('movies.show', $fGenre->id) }}" class="title">{{ $fGenre->title }}</a>
@@ -272,7 +272,7 @@
         @foreach ($filmByRelease as $filmRelease)
           <div class="item">
             <div class="w3l-movie-gride-agile w3l-movie-gride-agile1">
-              <a href="{{ route('movies.show', $filmRelease->id) }}" class="hvr-shutter-out-horizontal"><img src="/{{ $filmRelease->poster }}" title="{{ $filmRelease->title }}" class="img-responsive" alt=" " />
+              <a href="{{ route('movies.show', $filmRelease->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ $filmRelease->poster_url }}" title="{{ $filmRelease->title }}" class="img-responsive" alt=" " />
                 <div class="w3l-action-icon"><i class="fa fa-play-circle" aria-hidden="true"></i></div>
               </a>
               <div class="mid-1 agileits_w3layouts_mid_1_home">

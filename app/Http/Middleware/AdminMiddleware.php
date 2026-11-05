@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,16 +13,18 @@ class AdminMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check()) {
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
             return redirect()->route('home')
                 ->with('error', 'Silakan login terlebih dahulu untuk mengakses area admin.');
         }
 
-        if (!Auth::user()->isAdmin()) {
+        if (! $user->isAdmin()) {
             return redirect()->route('home')
                 ->with('error', 'Akses ditolak! Halaman ini hanya untuk Administrator.');
         }

@@ -83,7 +83,7 @@
                 <div style="display: flex; gap: 20px; align-items: flex-start;">
                     <div>
                         <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Poster Saat Ini:</div>
-                        <img src="{{ asset($film->poster) }}" alt="{{ $film->title }}" style="width: 80px; height: 110px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);" onerror="this.src='{{ asset('images/m1.jpg') }}'">
+                        <img src="{{ $film->poster_url }}" alt="{{ $film->title }}" style="width: 80px; height: 110px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);" onerror="this.src='{{ asset('images/m1.jpg') }}'">
                     </div>
                     <div style="flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div class="form-group">

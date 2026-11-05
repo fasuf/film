@@ -18,7 +18,7 @@
     <!-- Left Column: Poster & Quick Info -->
     <div class="card">
         <div style="padding: 16px; text-align: center;">
-            <img src="{{ asset($film->poster) }}" alt="{{ $film->title }}" style="width: 100%; max-height: 380px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);" onerror="this.src='{{ asset('images/m1.jpg') }}'">
+            <img src="{{ $film->poster_url }}" alt="{{ $film->title }}" style="width: 100%; max-height: 380px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);" onerror="this.src='{{ asset('images/m1.jpg') }}'">
         </div>
         <div class="card-body" style="padding-top: 0;">
             <h3 style="font-size: 18px; color: #fff; margin-bottom: 8px;">{{ $film->title }}</h3>

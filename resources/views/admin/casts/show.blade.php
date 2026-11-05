@@ -69,7 +69,7 @@
                         @if($peran->film)
                             <tr>
                                 <td>
-                                    <img src="{{ asset($peran->film->poster) }}" alt="{{ $peran->film->title }}" class="thumbnail-img" onerror="this.src='{{ asset('images/m1.jpg') }}'">
+                                    <img src="{{ $peran->film->poster_url }}" alt="{{ $peran->film->title }}" class="thumbnail-img" onerror="this.src='{{ asset('images/m1.jpg') }}'">
                                 </td>
                                 <td>
                                     <strong style="color: #fff;">{{ $peran->film->title }}</strong>

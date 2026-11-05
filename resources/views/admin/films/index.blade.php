@@ -63,7 +63,7 @@
                 @forelse($films as $film)
                     <tr>
                         <td>
-                            <img src="{{ asset($film->poster) }}" alt="{{ $film->title }}" class="thumbnail-img" onerror="this.src='{{ asset('images/m1.jpg') }}'">
+                            <img src="{{ $film->poster_url }}" alt="{{ $film->title }}" class="thumbnail-img" onerror="this.src='{{ asset('images/m1.jpg') }}'">
                         </td>
                         <td>
                             <strong style="color: #fff; font-size: 15px;">{{ $film->title }}</strong>

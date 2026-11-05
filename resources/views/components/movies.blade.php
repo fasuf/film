@@ -32,7 +32,7 @@
               @forelse ($films as $film)
                 <div class="col-md-2 w3l-movie-gride-agile">
                   <a href="{{ route('movies.show', $film->id) }}" class="hvr-shutter-out-horizontal">
-                    <img src="{{ asset($film->poster) }}" title="{{ $film->title }}" alt="{{ $film->title }}" />
+                    <img src="{{ $film->poster_url }}" title="{{ $film->title }}" alt="{{ $film->title }}" />
                     <div class="w3l-action-icon">
                       <i class="fa fa-play-circle" aria-hidden="true"></i>
                     </div>

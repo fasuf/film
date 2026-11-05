@@ -35,6 +35,17 @@ class Film extends Model
         ];
     }
 
+    public function getPosterUrlAttribute(): string
+    {
+        $poster = $this->poster;
+
+        if (str_starts_with($poster, 'storage/images/')) {
+            $poster = 'template/images/'.substr($poster, strlen('storage/images/'));
+        }
+
+        return asset($poster);
+    }
+
     /**
      * Film belongs to a genre.
      */

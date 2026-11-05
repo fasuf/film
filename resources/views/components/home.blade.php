@@ -11,7 +11,7 @@
 <div id="slidey" style="display:none;">
   <ul>
     @foreach ($filmSlidey as $film)
-      <li><img src="{{ $film->poster }}" alt="{{ $film->title }}">
+      <li><img src="{{ $film->poster_url }}" alt="{{ $film->title }}">
         <p class='title'>{{ $film->title }}</p>
         <p class='description'>{{ $film->sinopsis }}</p>
       </li>
@@ -38,7 +38,7 @@
         @for ($data = 0; $data < $films->count(); $data++)
           <div class="item">
             <div class="w3l-movie-gride-agile w3l-movie-gride-agile1">
-              <a href="{{ route('movies.show', $films[$data]->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ asset($films[$data]->poster) }}" title="album-name" alt=" " />
+              <a href="{{ route('movies.show', $films[$data]->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ $films[$data]->poster_url }}" title="album-name" alt=" " />
                 <div class="w3l-action-icon">
                   <i class="fa fa-play-circle" aria-hidden="true"></i>
                 </div>
@@ -100,7 +100,7 @@
           <div class="w3_agile_featured_movies">
             @for ($data = 0; $data < $filmFutured->count(); $data++)
               <div class="col-md-2 w3l-movie-gride-agile">
-                <a href="{{ route('movies.show', $filmFutured[$data]->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ asset($filmFutured[$data]->poster) }}" title="album-name" alt=" " />
+                <a href="{{ route('movies.show', $filmFutured[$data]->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ $filmFutured[$data]->poster_url }}" title="album-name" alt=" " />
                   <div class="w3l-action-icon">
                     <i class="fa fa-play-circle" aria-hidden="true"></i>
                   </div>
@@ -139,7 +139,7 @@
           <div class="w3_agile_featured_movies">
             @for ($data = 0; $data < $filmRecentAdded->count(); $data++)
               <div class="col-md-2 w3l-movie-gride-agile">
-                <a href="{{ route('movies.show', $filmRecentAdded[$data]->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ asset($filmRecentAdded[$data]->poster) }}" title="album-name" alt=" " />
+                <a href="{{ route('movies.show', $filmRecentAdded[$data]->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ $filmRecentAdded[$data]->poster_url }}" title="album-name" alt=" " />
                   <div class="w3l-action-icon">
                     <i class="fa fa-play-circle" aria-hidden="true"></i>
                   </div>

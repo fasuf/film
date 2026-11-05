@@ -14,15 +14,16 @@ class OtpVerificationMail extends Mailable
 
     public string $name;
     public string $otp;
+    public string $emailSubject;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(string $name, string $otp)
+    public function __construct(string $name, string $otp, string $subject = 'Kode Verifikasi OTP - One Movies')
     {
         $this->name = $name;
         $this->otp  = $otp;
-        $this->subject = 'Kode Verifikasi Pendaftaran';
+        $this->emailSubject = $subject;
     }
 
     /**
@@ -31,7 +32,7 @@ class OtpVerificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Kode Verifikasi Pendaftaran',
+            subject: $this->emailSubject,
         );
     }
 
@@ -41,7 +42,11 @@ class OtpVerificationMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            htmlString: "<p>Halo " . htmlspecialchars($this->name) . ",</p><p>Kode verifikasi pendaftaran akun Anda adalah: <strong>{$this->otp}</strong></p><p>Kode ini berlaku selama 10 menit. Jangan berikan kode ini kepada siapa pun.</p><p>Jika Anda tidak merasa melakukan pendaftaran ini, abaikan email ini.</p>",
+            view: 'emails.otp',
+            with: [
+                'name' => $this->name,
+                'otp'  => $this->otp,
+            ],
         );
     }
 }

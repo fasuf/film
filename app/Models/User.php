@@ -24,6 +24,8 @@ class User extends Authenticatable
         'role_id',
         'profile_id',
         'email_verified_at',
+        'otp_code',
+        'otp_expires_at',
     ];
 
     /**
@@ -34,6 +36,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'otp_code',
     ];
 
     /**
@@ -46,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'otp_expires_at' => 'datetime',
         ];
     }
 
@@ -71,6 +75,19 @@ class User extends Authenticatable
     public function kritiks()
     {
         return $this->hasMany(Kritik::class);
+    }
+
+    /**
+     * Get the registered devices for the user.
+     */
+    public function devices()
+    {
+        return $this->hasMany(UserDevice::class);
+    }
+
+    public function userDevices()
+    {
+        return $this->hasMany(UserDevice::class);
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{User, Profile, Role};
+use App\Models\{User, Profile, Role, UserDevice};
 use App\Mail\OtpVerificationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -91,30 +91,63 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
-            $request->session()->regenerate();
-
-            // Redirect back to intended page (e.g. film detail page #komentar) if present
-            $target = $request->input('redirect_to') ?: session()->pull('url.intended');
-
-            if ($target && (str_contains($target, '/login') || str_contains($target, '/register'))) {
-                $target = null;
-            }
-
-            if ($target) {
-                return redirect()->to($target)
-                    ->with('success', 'Berhasil login! Selamat datang, ' . Auth::user()->name . '.');
-            }
-
-            return redirect()->intended(route('home'))
-                ->with('success', 'Berhasil login! Selamat datang, ' . Auth::user()->name . '.');
+        if (!Auth::validate($credentials)) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors([
+                    'login' => 'Email atau password salah. Silakan coba lagi.',
+                ]);
         }
 
-        return back()
-            ->withInput($request->only('email'))
-            ->withErrors([
-                'login' => 'Email atau password salah. Silakan coba lagi.',
-            ]);
+        $user = User::where('email', $request->email)->first();
+
+        $userAgent = $request->userAgent() ?: 'Unknown Device';
+        $ipAddress = $request->ip();
+
+        // Periksa apakah User-Agent dari request saat ini sudah terdaftar di tabel user_devices
+        $deviceExists = UserDevice::where('user_id', $user->id)
+            ->where('user_agent', $userAgent)
+            ->exists();
+
+        if ($deviceExists) {
+            // Perangkat SUDAH terdaftar: langsung Auth::login() dan redirect ke /dashboard
+            Auth::login($user, $request->filled('remember'));
+            $request->session()->regenerate();
+
+            return redirect('/dashboard')
+                ->with('success', 'Berhasil login! Selamat datang, ' . $user->name . '.');
+        }
+
+        // Perangkat BELUM terdaftar (Perangkat Baru):
+        // 1. Generate kode OTP 6 digit acak
+        $otp = sprintf('%06d', random_int(100000, 999999));
+
+        // 2. Simpan kode OTP dan otp_expires_at (berlaku 10 menit) ke tabel users
+        $user->update([
+            'otp_code'       => $otp,
+            'otp_expires_at' => now()->addMinutes(10),
+        ]);
+
+        // 3. Kirim email kode OTP ke pengguna menggunakan Mail Laravel
+        try {
+            Mail::to($user->email)->send(new OtpVerificationMail(
+                $user->name, 
+                $otp, 
+                'Kode Verifikasi Login Perangkat Baru - One Movies'
+            ));
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim email OTP perangkat baru: ' . $e->getMessage());
+        }
+
+        // 4. Simpan user_id sementara di session (otp_user_id)
+        session([
+            'otp_user_id' => $user->id,
+            'remember'    => $request->filled('remember'),
+        ]);
+
+        // 5. Redirect pengguna ke halaman input OTP (route('otp.view'))
+        return redirect()->route('otp.view')
+            ->with('status', 'Kami telah mengirimkan kode OTP 6 digit ke email ' . $user->email . '. Silakan verifikasi untuk melanjutkan.');
     }
 
     /**
@@ -424,5 +457,100 @@ class AuthController extends Controller
             ->with('success', 'Password berhasil direset, silakan login.')
             ->with('showLoginModal', true)
             ->with('active_tab', 'login');
+    }
+
+    /**
+     * Show OTP verification form for new device login.
+     */
+    public function showVerifyOtp(Request $request)
+    {
+        $userId = session('otp_user_id');
+
+        if (!$userId) {
+            return redirect()->route('login')
+                ->with('warning', 'Sesi verifikasi OTP tidak ditemukan atau telah berakhir. Silakan login kembali.');
+        }
+
+        $user = User::find($userId);
+
+        if (!$user) {
+            session()->forget('otp_user_id');
+            return redirect()->route('login')
+                ->with('warning', 'Pengguna tidak ditemukan. Silakan login kembali.');
+        }
+
+        return view('auth.verify-otp', compact('user'));
+    }
+
+    /**
+     * Handle OTP verification for new device login.
+     */
+    public function verifyDeviceOtp(Request $request)
+    {
+        $request->validate([
+            'otp' => ['required', 'string'],
+        ], [
+            'otp.required' => 'Kode OTP wajib diisi.',
+        ]);
+
+        $userId = session('otp_user_id');
+
+        if (!$userId) {
+            return redirect()->route('login')
+                ->with('error', 'Sesi verifikasi OTP telah berakhir. Silakan login kembali.');
+        }
+
+        $user = User::find($userId);
+
+        if (!$user) {
+            session()->forget('otp_user_id');
+            return redirect()->route('login')
+                ->with('error', 'Pengguna tidak ditemukan. Silakan login kembali.');
+        }
+
+        // Validasi input OTP dan pastikan masa berlaku belum expired (now() < otp_expires_at)
+        if (!$user->otp_code || !$user->otp_expires_at) {
+            return back()->withErrors([
+                'otp' => 'Kode OTP tidak valid atau belum dibuat. Silakan login kembali.',
+            ]);
+        }
+
+        if (now()->gt($user->otp_expires_at)) {
+            return back()->withErrors([
+                'otp' => 'Kode OTP telah kadaluwarsa (lebih dari 10 menit). Silakan login ulang untuk mendapatkan kode baru.',
+            ]);
+        }
+
+        if (trim($request->otp) !== (string) $user->otp_code) {
+            return back()->withErrors([
+                'otp' => 'Kode OTP yang Anda masukkan salah. Silakan periksa kembali email Anda.',
+            ]);
+        }
+
+        // Jika valid:
+        // 1. Kosongkan otp_code dan otp_expires_at pada tabel users
+        $user->update([
+            'otp_code'       => null,
+            'otp_expires_at' => null,
+        ]);
+
+        // 2. Simpan perangkat baru (user_id, user_agent, dan ip_address) ke tabel user_devices
+        UserDevice::create([
+            'user_id'    => $user->id,
+            'user_agent' => $request->userAgent() ?: 'Unknown Device',
+            'ip_address' => $request->ip(),
+        ]);
+
+        // 3. Login-kan pengguna secara resmi (Auth::login())
+        $remember = session('remember', false);
+        Auth::login($user, $remember);
+        $request->session()->regenerate();
+
+        // 4. Hapus session temporary (otp_user_id)
+        session()->forget(['otp_user_id', 'remember']);
+
+        // 5. Redirect ke /dashboard
+        return redirect('/dashboard')
+            ->with('success', 'Perangkat berhasil diverifikasi! Selamat datang, ' . $user->name . '.');
     }
 }

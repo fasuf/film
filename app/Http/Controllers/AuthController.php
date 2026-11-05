@@ -483,6 +483,18 @@ class AuthController extends Controller
     }
 
     /**
+     * Redirect authenticated user to appropriate dashboard or home.
+     */
+    public function dashboard()
+    {
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('home');
+    }
+
+    /**
      * Handle OTP verification for new device login.
      */
     public function verifyDeviceOtp(Request $request)

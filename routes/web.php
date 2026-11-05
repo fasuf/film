@@ -48,12 +48,7 @@ Route::get('/verify-otp', [AuthController::class, 'showVerifyOtp'])->name('otp.v
 Route::post('/verify-otp', [AuthController::class, 'verifyDeviceOtp'])->name('otp.verify');
 
 // Dashboard Route
-Route::get('/dashboard', function () {
-    if (auth()->check() && auth()->user()->isAdmin()) {
-        return redirect()->route('admin.dashboard');
-    }
-    return redirect()->route('home');
-})->middleware('auth')->name('dashboard');
+Route::get('/dashboard', [AuthController::class, 'dashboard'])->middleware('auth')->name('dashboard');
 
 // Simple Password Reset (no email token)
 Route::post('/simple-reset', [AuthController::class, 'simpleReset'])->name('password.simple');

@@ -12,6 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
+
         $middleware->redirectGuestsTo(function ($request) {
             if ($request->is('subscribe') || $request->routeIs('subscribe')) {
                 session()->flash('warning', 'Silakan login terlebih dahulu untuk subscribe.');

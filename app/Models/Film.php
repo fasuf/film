@@ -35,14 +35,35 @@ class Film extends Model
         ];
     }
 
+    public function getPosterAttribute($value): string
+    {
+        if (empty($value)) {
+            return 'template/images/m1.jpg';
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        $clean = ltrim($value, '/');
+
+        if (str_starts_with($clean, 'storage/images/')) {
+            return 'template/images/' . substr($clean, strlen('storage/images/'));
+        }
+
+        if (str_starts_with($clean, 'images/')) {
+            return 'template/images/' . substr($clean, strlen('images/'));
+        }
+
+        return $clean;
+    }
+
     public function getPosterUrlAttribute(): string
     {
         $poster = $this->poster;
-
-        if (str_starts_with($poster, 'storage/images/')) {
-            $poster = 'template/images/'.substr($poster, strlen('storage/images/'));
+        if (str_starts_with($poster, 'http://') || str_starts_with($poster, 'https://')) {
+            return $poster;
         }
-
         return asset($poster);
     }
 

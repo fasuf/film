@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Genre;
+use App\Models\Film;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,23 +14,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        if (Role::count() === 0) {
+            $this->call(RoleSeeder::class);
+        }
 
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        if (Genre::count() === 0) {
+            $this->call(GenreSeeder::class);
+        }
 
-        $this->call([
-            GenreSeeder::class,
-            CastSeeder::class,
-            FilmSeeder::class,
-            PeranSeeder::class,
-            RoleSeeder::class,
-            ProfileSeeder::class,
-            UserSeeder::class,
-            AdminSeeder::class,
-            KritikSeeder::class,
-        ]);
+        if (Film::count() === 0) {
+            $this->call([
+                CastSeeder::class,
+                FilmSeeder::class,
+                PeranSeeder::class,
+                ProfileSeeder::class,
+                UserSeeder::class,
+                AdminSeeder::class,
+                KritikSeeder::class,
+            ]);
+        }
     }
 }
